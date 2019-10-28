@@ -1,0 +1,111 @@
+---
+
+- name: Create GeoIP2 directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /usr/share/GeoIP2
+    - /usr/share/nginx/modules
+  tags:
+    - nginx
+    - geoip
+
+- name: Download GeoLite2-Country.mmdb.gz
+  get_url:
+    url: https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz
+    dest: /usr/share/GeoIP2/GeoLite2-Country.mmdb.gz
+  tags:
+    - nginx
+    - geoip
+
+- name: gunzip /usr/share/GeoIP2/*.mmdb.gz
+  shell: gunzip /usr/share/GeoIP2/*.mmdb.gz
+  args:
+    creates: /usr/share/GeoIP2/GeoLite2-Country.mmdb
+  tags:
+    - nginx
+    - geoip
+
+- block:
+  - name: Geoip2 dependancy
+    apt:
+      name: "{{ geoip_packages_dependancies }}"
+    tags:
+      - nginx
+      - geoip
+
+  - name: Download ngx_http_geoip2_module
+    get_url:
+      url: "{{ ngx_http_geoip2_module_source }}"
+      dest: /opt/master.zip
+    tags:
+      - nginx
+      - geoip
+
+  - name: gunzip ngx_http_geoip2_module
+    shell: unzip master.zip && mv ngx_http_geoip2_module-master ngx_http_geoip2_module
+    args:
+      chdir: /opt/
+      creates: /opt/ngx_http_geoip2_module
+    tags:
+      - nginx
+      - geoip
+
+  - name: Get nginx version
+    shell: "apt-cache policy nginx | grep Candidate | sed 's/.*Candidate: //;s/-.*//'"
+    args:
+      creates: /opt/nginx
+    register: nginx_version
+    tags:
+      - nginx
+      - geoip
+
+  - name: Download nginx
+    get_url:
+      url: "http://nginx.org/download/nginx-{{ nginx_version.stdout }}.tar.gz"
+      dest: "/opt/nginx-{{ nginx_version.stdout }}.tar.gz"
+    tags:
+      - nginx
+      - geoip
+
+  - name: gunzip nginx
+    shell: "tar zxvf nginx-{{ nginx_version.stdout }}.tar.gz"
+    args:
+      chdir: /opt/
+      creates: "/opt/nginx-{{ nginx_version.stdout }}"
+    tags:
+      - nginx
+      - geoip
+
+  - name: Compile module geoip2
+    shell: ./configure --add-dynamic-module=/opt/ngx_http_geoip2_module --with-compat && make && make install
+    ignore_errors: yes
+    args:
+      chdir: "/opt/nginx-{{ nginx_version.stdout }}"
+      creates: "/usr/share/nginx/modules/ngx_http_geoip2_module.so"
+    tags:
+      - nginx
+      - geoip
+
+  - name: Copy ngx_http_geoip2_module.so
+    copy:
+      src: /usr/local/nginx/modules/ngx_http_geoip2_module.so
+      dest: /etc/nginx/modules/ngx_http_geoip2_module.so
+    tags:
+      - nginx
+      - geoip
+
+  - name: load_module ngx_http_geoip2_module
+    copy:
+      content: 'load_module modules/ngx_http_geoip2_module.so;'
+      dest: /etc/nginx/modules-enabled/50-mod-http-geoip2.conf
+    tags:
+      - nginx
+      - geoip
+
+  - name: Start the nginx service
+    service: name=nginx state=started
+    tags:
+      - nginx
+      - geoip

@@ -1,0 +1,10 @@
+# packages need
+geoip_packages_dependancies:
+  - zlib1g-dev
+  - zlibc
+  - libmaxminddb0
+  - libmaxminddb-dev
+  - unzip
+  - libpcre++-dev
+
+ngx_http_geoip2_module_source: https://github.com/leev/ngx_http_geoip2_module/archive/master.zip
