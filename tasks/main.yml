@@ -92,6 +92,7 @@
     copy:
       src: /usr/local/nginx/modules/ngx_http_geoip2_module.so
       dest: /etc/nginx/modules/ngx_http_geoip2_module.so
+      remote_src: yes
     tags:
       - nginx
       - geoip
