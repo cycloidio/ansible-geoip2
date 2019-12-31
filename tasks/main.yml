@@ -11,18 +11,13 @@
     - nginx
     - geoip
 
-- name: Download GeoLite2-Country.mmdb.gz
-  get_url:
-    url: https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz
-    dest: /usr/share/GeoIP2/GeoLite2-Country.mmdb.gz
-  tags:
-    - nginx
-    - geoip
-
-- name: gunzip /usr/share/GeoIP2/*.mmdb.gz
-  shell: gunzip /usr/share/GeoIP2/*.mmdb.gz
-  args:
-    creates: /usr/share/GeoIP2/GeoLite2-Country.mmdb
+- name: Download GeoLite2-Country database
+  unarchive:
+    src: "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key={{ geoip_license_key }}&suffix=tar.gz"
+    dest: /usr/share/GeoIP2/
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
   tags:
     - nginx
     - geoip
