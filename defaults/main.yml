@@ -8,3 +8,6 @@ geoip_packages_dependancies:
   - libpcre++-dev
 
 ngx_http_geoip2_module_source: https://github.com/leev/ngx_http_geoip2_module/archive/master.zip
+
+# to get this information: https://www.maxmind.com/en/my_license_key
+geoip_license_key: to-be-changed

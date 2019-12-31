@@ -24,6 +24,7 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | Name           | Default Value | Description                        |
 | -------------- | ------------- | -----------------------------------|
 | `geoip_packages_dependancies` | [] | dependancies packages |
+| `geoip_license_key` | `to-be-changed` | the license key to use in order to download database |
 
 ## Example
 
