@@ -7,6 +7,7 @@
   with_items:
     - /usr/share/GeoIP2
     - /usr/share/nginx/modules
+  ignore_errors: yes
   tags:
     - nginx
     - geoip
